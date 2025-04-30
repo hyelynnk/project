@@ -110,7 +110,7 @@ pub fn dfs_closest(start: usize, graph: &Graph, days: &[DaySummary], query: &Con
 
 
 #[test]
-//The test aims to see if given two day summarys, the query correctly identifies the one that is closer
+//The test aims to see if given two day summaries, the query correctly identifies the one that is closer
 fn test_bfs_finds_matching_day() {
     let graph_data = vec![
         DaySummary {

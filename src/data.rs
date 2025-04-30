@@ -76,6 +76,6 @@ mod tests {
         assert_eq!(rec.holiday, "No Holiday");
         assert_eq!(rec.functioning_day, "Yes");
 
-        std::fs::remove_file(path).unwrap(); // clean up
+        std::fs::remove_file(path).unwrap();
     }
 }
