@@ -1,8 +1,11 @@
+// This module defines data structures, structs, enums, and types utilized across different modules
 use serde::Deserialize;
 use std::fmt;
 
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
+
+//This struct represents each record in the dataset with all the characteristics
 pub struct RawRecord {
     #[serde(rename = "Date")]
     pub date: String,
@@ -39,6 +42,7 @@ pub struct RawRecord {
 
 
 #[derive(Debug, Clone, PartialEq)]
+//This enum Weather initializes the four possible weather labels
 pub enum Weather {
     Sunny,
     Rainy,
@@ -47,6 +51,7 @@ pub enum Weather {
 }
 
 impl fmt::Display for Weather {
+    //matches enum and then writes its string representation
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Weather::Sunny => write!(f, "Sunny"),
@@ -58,6 +63,7 @@ impl fmt::Display for Weather {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+//This enum TemperatureCategory intialiazes different temperature groups for the raw records
 pub enum TemperatureCategory {
     Hot,
     Moderate,
@@ -65,6 +71,7 @@ pub enum TemperatureCategory {
 }
 
 impl fmt::Display for TemperatureCategory {
+    //matches the temperature category and then writes its string representation
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             TemperatureCategory::Hot => write!(f, "Hot"),
@@ -75,6 +82,7 @@ impl fmt::Display for TemperatureCategory {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+//The enum pricipitation intensity initializes three possible precipitation groups
 pub enum PrecipitationIntensity {
     Light,
     Heavy,
@@ -82,6 +90,7 @@ pub enum PrecipitationIntensity {
 }
 
 impl fmt::Display for PrecipitationIntensity {
+    //This function matches its precipation intensity to the group and then writes a string representation
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             PrecipitationIntensity::Light => write!(f, "Light"),
@@ -92,6 +101,7 @@ impl fmt::Display for PrecipitationIntensity {
 }
 
 #[derive(Debug, Clone)]
+//This struct lists out traits that will be inputed by the user
 pub struct Conditions {
     pub month: u32,
     pub weather: Weather,
@@ -100,6 +110,7 @@ pub struct Conditions {
 }
 
 #[derive(Debug, Clone)]
+//This struct represents an aggregated data for a single calendar day
 pub struct DaySummary {
     pub date: String,
     pub month: u32,

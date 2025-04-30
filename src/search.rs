@@ -1,9 +1,13 @@
+//This module implements algorithms to predict bike rental count given weather conditions
 use crate::common::{DaySummary, Conditions};
 
-pub fn build_graph(daily_data: &[DaySummary]) -> Vec<DaySummary> {
+//The daily data is turned into a vector
+pub fn make_graph(daily_data: &[DaySummary]) -> Vec<DaySummary> {
     daily_data.to_vec()
 }
 
+//The function for calculating similarity score is outlined. If the query and the day have essentially different values, the score goes up
+//The higher the score is, the more that value is dissimilar from what we're interested in
 fn similarity_score(day: &DaySummary, query: &Conditions) -> i32 {
     let mut score = 0;
     if day.month != query.month {
@@ -21,12 +25,14 @@ fn similarity_score(day: &DaySummary, query: &Conditions) -> i32 {
     score
 }
 
+//Therefore, in order to find the closest in the bfs algorithm, we look for the min similarity score after iteration.
 pub fn bfs_closest(query: &Conditions, graph: &[DaySummary]) -> Option<DaySummary> {
     graph.iter()
         .min_by_key(|day| similarity_score(day, query))
         .cloned()
 }
 
+//Same thing with finding the min by key is applied for dfs algorithm, but in the reverse order
 pub fn dfs_closest(query: &Conditions, graph: &[DaySummary]) -> Option<DaySummary> {
     graph.iter()
         .rev()
@@ -34,6 +40,7 @@ pub fn dfs_closest(query: &Conditions, graph: &[DaySummary]) -> Option<DaySummar
         .cloned()
 }
 
+//The test aims to see if given two day summarys, the query correctly identifies the one that is closer
 #[test]
 fn test_bfs_finds_matching_day() {
     use crate::common::{Weather, TemperatureCategory, PrecipitationIntensity};

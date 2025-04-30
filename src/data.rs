@@ -1,8 +1,10 @@
+//This module initializes the dataframe by loading the csv file and turning it into the vector of raw records
 use crate::common::RawRecord;
 use std::error::Error;
 use std::fs::File;
 use csv::ReaderBuilder;
 
+//This function loads in the csv file by taking in the path and outputting the vector of raw records
 pub fn load_data(path: &str) -> Result<Vec<RawRecord>, Box<dyn Error>> {
     let mut rdr = ReaderBuilder::new()
         .delimiter(b',')
@@ -13,6 +15,8 @@ pub fn load_data(path: &str) -> Result<Vec<RawRecord>, Box<dyn Error>> {
 
     let mut dataset = Vec::new();
 
+    //The for loop iterates through the raw records(rows) and then for each row, splits the date apart to specify the date/month/year structure
+    //Then once it is checked that the raw record represents a functioning day, it is added to the dataset
     for result in rdr.deserialize::<RawRecord>() {
         match result {
             Ok(mut record) => {
@@ -29,14 +33,11 @@ pub fn load_data(path: &str) -> Result<Vec<RawRecord>, Box<dyn Error>> {
             }
         }
     }
-
-    if dataset.is_empty() {
-        return Err("No valid records.".into());
-    }
-
     Ok(dataset)
 }
 
+//The test creates an arbitrary csv file and loads the data
+//Looking at the first record, it checks through assert_eq! that each variable matches the expected
 #[cfg(test)]
 mod tests {
     use std::fs::File;
@@ -59,7 +60,6 @@ mod tests {
         let records = result.unwrap();
         assert_eq!(records.len(), 2);
 
-        // Check field values for the first record
         let rec = &records[0];
         assert_eq!(rec.date, "01/12/2017");
         assert_eq!(rec.rented_bike_count, 254);

@@ -1,3 +1,7 @@
+//This module makes use of modules created and displays some key statistics regarding bike rentals.
+//This module also takes in user input to conduct BFS and DFS to estimate the total bike rentals for given weather conditions.
+
+//all the modules and the specific structs, enums, and functions are imported
 mod data;
 mod model;
 mod search;
@@ -7,14 +11,17 @@ use std::io::{self, Write};
 use std::process;
 use std::collections::HashMap;
 
-use common::{Weather, TemperatureCategory, PrecipitationIntensity,Conditions};
+use common::{Weather, TemperatureCategory, PrecipitationIntensity, Conditions};
 use model::summarize_daily_totals;
-use search::{build_graph, bfs_closest, dfs_closest};
+use search::{make_graph, bfs_closest, dfs_closest};
 
-fn get_user_input() -> Conditions {
+//This function takes in the user input and according to it, intializes the condition used for search algorithms
+//Will skip explanations for other user inputs as they all essentially use the same code
+fn user_input() -> Conditions {
+    //takes in input as String
     let mut input = String::new();
 
-    print!("Enter month (ex. 1): ");
+    print!("Enter month (ex. 1-12): ");
     io::stdout().flush().unwrap();
     io::stdin().read_line(&mut input).unwrap();
     let month: u32 = match input.trim().parse() {
@@ -51,7 +58,7 @@ fn get_user_input() -> Conditions {
             "heavy" => PrecipitationIntensity::Heavy,
             _ => {
                 println!("Invalid intensity");
-                PrecipitationIntensity::Light
+                PrecipitationIntensity::Light //default
             }
         };
     }
@@ -79,6 +86,7 @@ fn get_user_input() -> Conditions {
 }
 
 fn main() {
+    //Loads data
     let raw_data = match data::load_data("SeoulBikeData 4.csv") {
         Ok(d) => d,
         Err(e) => {
@@ -88,7 +96,7 @@ fn main() {
     };
     
     let daily_summaries = summarize_daily_totals(&raw_data);
-    let graph = build_graph(&daily_summaries);
+    let graph = make_graph(&daily_summaries);
 
     let mut season_totals: HashMap<String, (i32, usize)> = HashMap::new();
     let mut weather_totals: HashMap<String, (i32, usize)> = HashMap::new();
@@ -97,6 +105,7 @@ fn main() {
     let mut wind_high = (0, 0);
     let mut wind_low = (0, 0);
 
+    //The for loop iterates through the daily_summaries and figures out total rentals for all given conditions
     for day in &daily_summaries {
 
         let season = match day.month {
@@ -107,21 +116,17 @@ fn main() {
         };
 
         season_totals.entry(season.to_string())
-            .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 })
-            .or_insert((day.total_rentals, 1));
+            .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 });
 
         weather_totals.entry(format!("{}", day.weather))
-            .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 })
-            .or_insert((day.total_rentals, 1));
+            .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 });
 
         temp_totals.entry(format!("{}", day.temperature_category))
-            .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 })
-            .or_insert((day.total_rentals, 1));
+            .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 });
 
         if matches!(day.weather, Weather::Rainy | Weather::Snowy) {
             rain_totals.entry(format!("{}", day.precipitation))
-                .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 })
-                .or_insert((day.total_rentals, 1));
+                .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 });
         }
 
         if day.weather == Weather::Foggy {
@@ -158,15 +163,19 @@ fn main() {
 
     println!();
     println!("Use conditions for prediction:");
-    let query = get_user_input();
+    println!();
+
+    //User Input starts here
+    let query = user_input();
 
     println!();
     println!("[Finding the closest match]");
-    println!("  Month: {}", query.month);
-    println!("  Weather: {}", query.weather);
-    println!("  Temperature: {}", query.temperature);
-    println!("  Precipitation: {}", query.precipitation);
+    println!("  - Month: {}", query.month);
+    println!("  - Weather: {}", query.weather);
+    println!("  - Temperature: {}", query.temperature);
+    println!("  - Precipitation: {}", query.precipitation);
 
+    //Uses search algorithm to figure out the estimated total rentals given weather conditions by looking at historical data
     if let Some(day) = bfs_closest(&query, &graph) {
         println!("[BFS] Closest match: {} - {} rentals", day.date, day.total_rentals);
     } else {
