@@ -2,6 +2,7 @@
 use serde::Deserialize;
 use std::fmt;
 
+//The code on the next line was added since not all variables of struct RawRecord get used in the project so it generated warnings
 #[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 

@@ -13,7 +13,7 @@ use std::collections::HashMap;
 
 use common::{Weather, TemperatureCategory, PrecipitationIntensity, Conditions};
 use model::summarize_daily_totals;
-use search::{make_graph, bfs_closest, dfs_closest};
+use search::{build_graph, bfs_closest, dfs_closest};
 
 //This function takes in the user input and according to it, intializes the condition used for search algorithms
 //Will skip explanations for other user inputs as they all essentially use the same code
@@ -96,7 +96,8 @@ fn main() {
     };
     
     let daily_summaries = summarize_daily_totals(&raw_data);
-    let graph = make_graph(&daily_summaries);
+    let graph = build_graph(&daily_summaries);
+    let start_index = 0;
 
     let mut season_totals: HashMap<String, (i32, usize)> = HashMap::new();
     let mut weather_totals: HashMap<String, (i32, usize)> = HashMap::new();
@@ -116,17 +117,21 @@ fn main() {
         };
 
         season_totals.entry(season.to_string())
-            .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 });
+            .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 })
+            .or_insert((day.total_rentals, 1));
 
         weather_totals.entry(format!("{}", day.weather))
-            .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 });
+            .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 })
+            .or_insert((day.total_rentals, 1));
 
         temp_totals.entry(format!("{}", day.temperature_category))
-            .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 });
+            .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 })
+            .or_insert((day.total_rentals, 1));
 
         if matches!(day.weather, Weather::Rainy | Weather::Snowy) {
             rain_totals.entry(format!("{}", day.precipitation))
-                .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 });
+                .and_modify(|e| { e.0 += day.total_rentals; e.1 += 1 })
+                .or_insert((day.total_rentals, 1));
         }
 
         if day.weather == Weather::Foggy {
@@ -176,13 +181,13 @@ fn main() {
     println!("  - Precipitation: {}", query.precipitation);
 
     //Uses search algorithm to figure out the estimated total rentals given weather conditions by looking at historical data
-    if let Some(day) = bfs_closest(&query, &graph) {
+    if let Some(day) = bfs_closest(start_index, &graph, &daily_summaries, &query) {
         println!("[BFS] Closest match: {} - {} rentals", day.date, day.total_rentals);
     } else {
         println!("[BFS] No matching day found.");
     }
-
-    if let Some(day) = dfs_closest(&query, &graph) {
+    
+    if let Some(day) = dfs_closest(start_index, &graph, &daily_summaries, &query) {
         println!("[DFS] Closest match: {} - {} rentals", day.date, day.total_rentals);
     } else {
         println!("[DFS] No matching day found.");
